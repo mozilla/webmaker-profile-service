@@ -4,7 +4,7 @@
   "description": "Backend service for Webmaker Profile",
   "main": "app.js",
   "dependencies": {
-    "connect": "~2.9.0"
+    "restify": "~2.6.0"
   },
   "devDependencies": {},
   "scripts": {
