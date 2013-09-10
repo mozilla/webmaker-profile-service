@@ -2,7 +2,7 @@
 
 # Webmaker Profile Service
 
-A REST-ful service primarily used by the Webmaker Profile app.
+A REST-ful service for the Webmaker Profile app.
 
 ## Routes
 
