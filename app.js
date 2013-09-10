@@ -9,6 +9,8 @@ var server = restify.createServer({
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
 server.use(restify.bodyParser());
+server.use(restify.CORS());
+server.use(restify.fullResponse());
 
 server.get('/user-data/:username', function (req, res, next) {
   var userData = fs.readFileSync('fake.json', {
