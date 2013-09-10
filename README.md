@@ -1,6 +1,8 @@
+[![Dependency Status](https://gemnasium.com/gvn/webmaker-profile-service.png)](https://gemnasium.com/gvn/webmaker-profile-service)
+
 # Webmaker Profile Service
 
-A REST-ful web service primarily for the Webmaker Profile app.
+A REST-ful service primarily used by the Webmaker Profile app.
 
 ## Routes
 
