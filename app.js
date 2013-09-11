@@ -3,7 +3,7 @@ var fs = require('fs');
 var _ = require('lodash');
 
 // TODO - use actual data
-var userData = fs.readFileSync('fake.json', {
+var userData = fs.readFileSync('db/reanimator.json', {
   encoding: 'utf8'
 });
 
@@ -28,6 +28,7 @@ server.use(restify.fullResponse());
 
 server.get('/user-data/:username', function (req, res, next) {
   res.send(userData);
+  console.log(req.route.method, req.url);
   return next();
 });
 
@@ -40,13 +41,24 @@ server.get('/user-data/:username/:key', function (req, res, next) {
     }
   }
 
+  console.log(req.route.method, req.url);
   return next();
 });
 
 server.post('/user-data/:username', function (req, res, next) {
-  // TODO - ensure authentication and store in DB
+  // TODO - ensure authentication and store in real DB
 
+  console.log(req.route.method, req.url);
   console.log(req.params);
+
+  _.merge(userData, req.params);
+
+  fs.writeFile(
+    './db/' + req.params.username + '.json',
+    JSON.stringify(userData, null, 2), // 2 space indent
+    function () {
+      console.log('Wrote to ' + req.params.username + '.json');
+    });
 
   res.send(201);
   return next();
@@ -55,3 +67,4 @@ server.post('/user-data/:username', function (req, res, next) {
 server.listen(8080, function () {
   console.log('%s listening at %s', server.name, server.url);
 });
+

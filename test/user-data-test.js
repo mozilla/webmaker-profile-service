@@ -46,4 +46,7 @@ suite.discuss('When using user-data')
   })
   .get('/user-data/reanimator/socialSecurityNumber')
   .expect(404)
+  .setHeader('Content-Type', 'application/json')
+  .post('/user-data/reanimator', {foo: 'bar'})
+  .expect(201)
   .export(module);
