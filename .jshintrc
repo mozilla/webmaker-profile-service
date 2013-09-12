@@ -1,11 +1,5 @@
 {
-  "globals": {
-    "module": true,
-    "define": true,
-    "require": true,
-    "console": true
-  },
-  "browser": true,
+  "node": true,
   "curly": true,
   "eqeqeq": true,
   "latedef": true,

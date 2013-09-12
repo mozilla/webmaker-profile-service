@@ -1,6 +1,6 @@
 {
-  "username": "reanimator",
-  "realName": "Herb West",
+  "username": "remixmanifesto",
+  "realName": "Brett Gaylor",
   "avatarSrc": "_fe/img/fpo-avatar.jpg",
   "makes": [
     {
@@ -393,16 +393,9 @@
       "editurl": "http://popcorn.webmadecontent.org/11sj/edit",
       "remixurl": "http://popcorn.webmadecontent.org/11sj/remix",
       "avatar": "https://secure.gravatar.com/avatar/b35e317eea80487a2b03cf7e5950b4ae?s=44&d=https%3A%2F%2Fstuff.webmaker.org%2Favatars%2Fwebmaker-avatar-44x44.png"
-    },
-    {
-      "id": "d0500ee0-a5d8-4be6-9fa8-79acdc6a09c7",
-      "tool": "profile",
-      "type": "hackable",
-      "content": "<h1>whoaaaaa</h1>"
     }
   ],
   "tileOrder": [
-    "d0500ee0-a5d8-4be6-9fa8-79acdc6a09c7",
     "51f7d16f959f4e674b000017",
     "51f82e05254144b93f000003",
     "51eeb289d828d17c4800011b",

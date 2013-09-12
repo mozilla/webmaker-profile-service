@@ -20,6 +20,8 @@ server.use(restify.bodyParser());
 server.use(restify.CORS());
 server.use(restify.fullResponse());
 
+var isWriting = false;
+
 // ROUTES ---------------------------------------------------------------------
 
 // User Data
@@ -46,19 +48,43 @@ server.get('/user-data/:username/:key', function (req, res, next) {
 });
 
 server.post('/user-data/:username', function (req, res, next) {
+  var waitForWrite;
+
   // TODO - ensure authentication and store in real DB
-
+  console.log(new Date());
   console.log(req.route.method, req.url);
-  console.log(req.params);
 
-  _.merge(userData, req.params);
+  // Overwrite existing keys with new data
+  _.assign(userData, req.params);
 
-  fs.writeFile(
-    './db/' + req.params.username + '.json',
-    JSON.stringify(userData, null, 2), // 2 space indent
-    function () {
-      console.log('Wrote to ' + req.params.username + '.json');
-    });
+  function writeToJSON() {
+    isWriting = true;
+
+    fs.writeFile(
+      './db/' + req.params.username + '.json',
+      JSON.stringify(userData, null, 2), // 2 space indent
+
+      function () {
+        console.log('Wrote to ' + req.params.username + '.json');
+        isWriting = false;
+      });
+  }
+
+  // TODO - This is super hacky, but so is using a text file as a database
+  if (!isWriting) {
+    writeToJSON();
+  } else {
+    console.log('Write still in progress. Delaying...');
+
+    waitForWrite = setInterval(function() {
+      if (!isWriting) {
+        writeToJSON();
+        clearInterval(waitForWrite);
+      } else {
+        console.log('Waiting another 100ms');
+      }
+    }, 100);
+  }
 
   res.send(201);
   return next();
@@ -67,4 +93,3 @@ server.post('/user-data/:username', function (req, res, next) {
 server.listen(process.env.PORT || 8080, function () {
   console.log('%s listening at %s', server.name, server.url);
 });
-
