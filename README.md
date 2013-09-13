@@ -12,7 +12,11 @@ Returns all JSON necessary for the initial build of the profile for *USERNAME*.
 
 ### GET /user-data/USERNAME/KEY
 
-Returns specific key value from USERNAME's data.
+Returns specific key value from *USERNAME*'s data.
+
+### POST /user-data/USERNAME
+
+Send any JSON to be appended to *USERNAME*'s data .
 
 ## Setup
 
