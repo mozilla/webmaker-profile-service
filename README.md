@@ -16,7 +16,7 @@ Returns specific key value from *USERNAME*'s data.
 
 ### POST /user-data/USERNAME
 
-Send any JSON to be appended to *USERNAME*'s data .
+Send any JSON to be appended to *USERNAME*'s data.
 
 ## Setup
 
