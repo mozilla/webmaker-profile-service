@@ -107,7 +107,8 @@ server.post('/store-img', function (req, res, next) {
   require('fs').writeFile(imgPath, base64Data, 'base64');
 
   res.send(201, {
-    imageURL: /*server.url*/ 'http://wmp-service.herokuapp.com' + '/' + imgPath
+    //imageURL: 'http://wmp-service.herokuapp.com' + '/' + imgPath // HEROKU
+    imageURL: server.url + '/' + imgPath // LOCALHOST
   });
 
   return next();
