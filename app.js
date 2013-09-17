@@ -1,6 +1,11 @@
+// INCLUDES -------------------------------------------------------------------
+
 var restify = require('restify');
 var fs = require('fs');
 var _ = require('lodash');
+var Static = require('node-static');
+
+// SETUP ----------------------------------------------------------------------
 
 // TODO - use actual data
 var userData = fs.readFileSync('db/reanimator.json', {
@@ -76,7 +81,7 @@ server.post('/user-data/:username', function (req, res, next) {
   } else {
     console.log('Write still in progress. Delaying...');
 
-    waitForWrite = setInterval(function() {
+    waitForWrite = setInterval(function () {
       if (!isWriting) {
         writeToJSON();
         clearInterval(waitForWrite);
@@ -89,6 +94,34 @@ server.post('/user-data/:username', function (req, res, next) {
   res.send(201);
   return next();
 });
+
+// Store Image
+// TODO : Store imgs on S3
+
+server.post('/store-img', function (req, res, next) {
+  console.log(req.route.method, req.url, req.contentType());
+
+  var imgPath = 'gifs/' + Date.now() + '.gif';
+  var base64Data = req.params.image.replace(/^data:image\/gif;base64,/, '');
+
+  require('fs').writeFile(imgPath, base64Data, 'base64');
+
+  res.send(201, {
+    imageURL: /*server.url*/ 'http://wmp-service.herokuapp.com' + '/' + imgPath
+  });
+
+  return next();
+});
+
+// Serve Static Content (TEMP - Remove once imgs are stored on S3)
+
+var file = new Static.Server('./');
+
+server.get(/^\/gifs\/.*/, function (req, res, next) {
+  file.serve(req, res, next);
+});
+
+// START ----------------------------------------------------------------------
 
 server.listen(process.env.PORT || 8080, function () {
   console.log('%s listening at %s', server.name, server.url);
