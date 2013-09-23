@@ -4,7 +4,8 @@
   "description": "Backend service for Webmaker Profile",
   "main": "app.js",
   "dependencies": {
-    "express": "3.4.0"
+    "express": "3.4.0",
+    "habitat": "~0.4.2"
   },
   "devDependencies": {
     "api-easy": "0.3.8",

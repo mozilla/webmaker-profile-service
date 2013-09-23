@@ -2,9 +2,14 @@
 
 var express = require('express'),
     fs = require('fs'),
+    Habitat = require('habitat'),
     path = require('path');
 
 // SETUP ----------------------------------------------------------------------
+
+Habitat.load();
+
+var config = new Habitat();
 
 // TODO - use actual data
 var userData = fs.readFileSync('db/reanimator.json', {
@@ -125,8 +130,6 @@ server.post('/store-img', function (req, res, next) {
 });
 
 // START ----------------------------------------------------------------------
-var port = process.env.PORT || 8080;
-
-server.listen(port, function () {
-  console.log('listening on port ' + port);
+server.listen(config.get('PORT'), function () {
+  console.log('server listening on port %s', config.get('PORT'));
 });
