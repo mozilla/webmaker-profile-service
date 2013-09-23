@@ -1,9 +1,8 @@
 // INCLUDES -------------------------------------------------------------------
 
-var restify = require('restify');
-var fs = require('fs');
-var _ = require('lodash');
-var Static = require('node-static');
+var express = require('express'),
+    fs = require('fs'),
+    path = require('path');
 
 // SETUP ----------------------------------------------------------------------
 
@@ -14,16 +13,38 @@ var userData = fs.readFileSync('db/reanimator.json', {
 
 userData = JSON.parse(userData);
 
-var server = restify.createServer({
-  name: 'webmaker-profile-service',
-  version: '0.1.0'
+var server = express();
+
+server.disable( 'x-powered-by' );
+server.use(express.compress());
+server.use(express.logger());
+server.use(express.json());
+server.use(express.urlencoded());
+// unsafe, remove later
+server.use(express.multipart());
+
+server.use(express.cookieParser());
+server.use(express.cookieSession({
+  key: 'webmaker-profile.sid',
+  secret: 'a',
+  cookie: {
+    // 31 days
+    maxAge: 31 * 24 * 60 * 60 * 1000,
+    secure: false
+  },
+  proxy: true
+}));
+
+server.use(express.static( path.join(__dirname + '/public')));
+
+server.use(function cors( req, res, next ) {
+  res.header( "Access-Control-Allow-Origin", "*" );
+  res.header( "Access-Control-Allow-Headers", "Content-Type" );
+  next();
 });
 
-server.use(restify.acceptParser(server.acceptable));
-server.use(restify.queryParser());
-server.use(restify.bodyParser());
-server.use(restify.CORS());
-server.use(restify.fullResponse());
+server.use( server.router );
+
 
 var isWriting = false;
 
@@ -34,37 +55,30 @@ var isWriting = false;
 // TODO - get specific key values if specified by param
 
 server.get('/user-data/:username', function (req, res, next) {
-  res.send(userData);
+  res.json(userData);
   console.log(req.route.method, req.url);
-  return next();
 });
 
 server.get('/user-data/:username/:key', function (req, res, next) {
-  if (_.isString(req.params.key)) {
-    if (userData[req.params.key]) {
-      res.send(userData[req.params.key]);
-    } else {
-      res.send(404);
-    }
+  if (userData[req.params.key]) {
+    res.json(userData[req.params.key]);
+  } else {
+    res.send(404);
   }
 
   console.log(req.route.method, req.url);
-  return next();
 });
 
 server.post('/user-data/:username', function (req, res, next) {
   var waitForWrite;
 
-  // TODO - ensure authentication and store in real DB
-  console.log(new Date());
-  console.log(req.route.method, req.url);
-
   // Overwrite existing keys with new data
-  _.assign(userData, req.params);
+  Object.keys( req.body ).forEach(function(key) {
+    userData[key] = req.body[key];
+  });
 
   function writeToJSON() {
     isWriting = true;
-
     fs.writeFile(
       './db/' + req.params.username + '.json',
       JSON.stringify(userData, null, 2), // 2 space indent
@@ -92,38 +106,27 @@ server.post('/user-data/:username', function (req, res, next) {
   }
 
   res.send(201);
-  return next();
 });
 
 // Store Image
 // TODO : Store imgs on S3
 
 server.post('/store-img', function (req, res, next) {
-  console.log(req.route.method, req.url, req.contentType());
+  var imgPath = 'public/gifs/' + Date.now() + '.gif';
 
-  var imgPath = 'gifs/' + Date.now() + '.gif';
-  var base64Data = req.params.image.replace(/^data:image\/gif;base64,/, '');
+  var base64Data = req.body.image.replace(/^data:image\/gif;base64,/, '');
 
   require('fs').writeFile(imgPath, base64Data, 'base64');
 
-  res.send(201, {
+  res.json(201, {
     //imageURL: 'http://wmp-service.herokuapp.com' + '/' + imgPath // HEROKU
-    imageURL: server.url + '/' + imgPath // LOCALHOST
+    imageURL: imgPath.replace('public/', 'http://localhost:8080/') // LOCALHOST
   });
-
-  return next();
-});
-
-// Serve Static Content (TEMP - Remove once imgs are stored on S3)
-
-var file = new Static.Server('./');
-
-server.get(/^\/gifs\/.*/, function (req, res, next) {
-  file.serve(req, res, next);
 });
 
 // START ----------------------------------------------------------------------
+var port = process.env.PORT || 8080;
 
-server.listen(process.env.PORT || 8080, function () {
-  console.log('%s listening at %s', server.name, server.url);
+server.listen(port, function () {
+  console.log('listening on port ' + port);
 });
