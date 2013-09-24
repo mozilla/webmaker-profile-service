@@ -3,7 +3,8 @@
 var express = require('express'),
     fs = require('fs'),
     Habitat = require('habitat'),
-    path = require('path');
+    path = require('path'),
+    uid = require('uid2');
 
 // SETUP ----------------------------------------------------------------------
 
@@ -43,13 +44,38 @@ server.use(express.cookieSession({
 server.use(express.static( path.join(__dirname + '/public')));
 
 server.use(function cors( req, res, next ) {
-  res.header( "Access-Control-Allow-Origin", "*" );
-  res.header( "Access-Control-Allow-Headers", "Content-Type" );
+  res.header( 'Access-Control-Allow-Origin', '*' );
+  res.header( 'Access-Control-Allow-Headers', 'Content-Type, x-csrf-token' );
   next();
 });
 
-server.use( server.router );
-
+require('express-persona')(server, {
+  audience: config.get('AUDIENCE'),
+  verifyResponse: function(err, req, res, email) {
+    if ( err ) {
+      return res.json({
+        status: "failure",
+        reason: err
+      });
+    }
+    req.session.email = email;
+    req.session._csrf = uid(24);
+    res.json({
+      status: "okay",
+      data: {
+        email: email,
+        csrf: req.session._csrf
+      }
+    });
+  },
+  logoutResponse: function(err, req, res) {
+    delete req.session.email;
+    delete req.session._csrf;
+    res.json({
+      status: "okay"
+    });
+  }
+});
 
 var isWriting = false;
 
@@ -61,7 +87,6 @@ var isWriting = false;
 
 server.get('/user-data/:username', function (req, res, next) {
   res.json(userData);
-  console.log(req.route.method, req.url);
 });
 
 server.get('/user-data/:username/:key', function (req, res, next) {
@@ -70,11 +95,9 @@ server.get('/user-data/:username/:key', function (req, res, next) {
   } else {
     res.send(404);
   }
-
-  console.log(req.route.method, req.url);
 });
 
-server.post('/user-data/:username', function (req, res, next) {
+server.post('/user-data/:username', express.csrf(), function (req, res, next) {
   var waitForWrite;
 
   // Overwrite existing keys with new data
@@ -89,7 +112,6 @@ server.post('/user-data/:username', function (req, res, next) {
       JSON.stringify(userData, null, 2), // 2 space indent
 
       function () {
-        console.log('Wrote to ' + req.params.username + '.json');
         isWriting = false;
       });
   }
@@ -98,14 +120,10 @@ server.post('/user-data/:username', function (req, res, next) {
   if (!isWriting) {
     writeToJSON();
   } else {
-    console.log('Write still in progress. Delaying...');
-
     waitForWrite = setInterval(function () {
       if (!isWriting) {
         writeToJSON();
         clearInterval(waitForWrite);
-      } else {
-        console.log('Waiting another 100ms');
       }
     }, 100);
   }
@@ -116,7 +134,7 @@ server.post('/user-data/:username', function (req, res, next) {
 // Store Image
 // TODO : Store imgs on S3
 
-server.post('/store-img', function (req, res, next) {
+server.post('/store-img', express.csrf(), function (req, res, next) {
   var imgPath = 'public/gifs/' + Date.now() + '.gif';
 
   var base64Data = req.body.image.replace(/^data:image\/gif;base64,/, '');

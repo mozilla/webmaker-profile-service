@@ -5,7 +5,9 @@
   "main": "app.js",
   "dependencies": {
     "express": "3.4.0",
-    "habitat": "~0.4.2"
+    "express-persona": "0.1.0",
+    "habitat": "0.4.2",
+    "uid2": "0.0.3"
   },
   "devDependencies": {
     "api-easy": "0.3.8",
