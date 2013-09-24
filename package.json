@@ -7,7 +7,8 @@
     "express": "3.4.0",
     "express-persona": "0.1.0",
     "habitat": "0.4.2",
-    "uid2": "0.0.3"
+    "uid2": "0.0.3",
+    "webmaker-loginapi": "https://github.com/mozilla/node-webmaker-loginapi/archive/v0.1.11.tar.gz"
   },
   "devDependencies": {
     "api-easy": "0.3.8",
