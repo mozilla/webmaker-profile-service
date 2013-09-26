@@ -16,5 +16,9 @@
   "scripts": {
     "test": "vows test/*-test.js"
   },
-  "author": "Webmaker Product Team <webmaker-staff@mozillafoundation.org>"
+  "author": "Webmaker Product Team <webmaker-staff@mozillafoundation.org>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mozilla/webmaker-profile-service.git"
+  }
 }
