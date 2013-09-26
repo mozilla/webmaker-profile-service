@@ -97,7 +97,7 @@ server.get('/user-data/:username/:key', function (req, res, next) {
   }
 });
 
-server.post('/user-data/:username', express.csrf(), function (req, res, next) {
+server.post('/user-data/:username', function (req, res, next) {
   var waitForWrite;
 
   // Overwrite existing keys with new data
@@ -134,7 +134,7 @@ server.post('/user-data/:username', express.csrf(), function (req, res, next) {
 // Store Image
 // TODO : Store imgs on S3
 
-server.post('/store-img', express.csrf(), function (req, res, next) {
+server.post('/store-img', function (req, res, next) {
   var imgPath = 'public/gifs/' + Date.now() + '.gif';
 
   var base64Data = req.body.image.replace(/^data:image\/gif;base64,/, '');
