@@ -44,8 +44,9 @@ server.use(express.cookieSession({
 server.use(express.static( path.join(__dirname + '/public')));
 
 server.use(function cors( req, res, next ) {
-  res.header( 'Access-Control-Allow-Origin', '*' );
-  res.header( 'Access-Control-Allow-Headers', 'Content-Type, x-csrf-token' );
+  res.header('Access-Control-Allow-Origin', config.get('AUDIENCE'));
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, x-csrf-token');
   next();
 });
 
