@@ -30,6 +30,56 @@
         "amyburvall",
         "intro"
       ],
+      "likes": [
+        {
+          "userId": 103,
+          "_id": "522e23cdff4251e979000006"
+        },
+        {
+          "userId": 470,
+          "_id": "522e25d8907eab2e58000005"
+        },
+        {
+          "userId": 42150,
+          "_id": "522eba85e83954447700001c"
+        },
+        {
+          "userId": 657,
+          "_id": "522f395e16cfc8b345000039"
+        },
+        {
+          "userId": 67,
+          "_id": "522f3eba907eab2e5800002d"
+        },
+        {
+          "userId": 1144,
+          "_id": "522f51a9907eab2e58000034"
+        },
+        {
+          "userId": 128,
+          "_id": "522f706d52ca389a6a000003"
+        },
+        {
+          "userId": 38712,
+          "_id": "52304020e5b412a176000068"
+        },
+        {
+          "userId": 14,
+          "_id": "5230da37e5b412a1760000d3"
+        },
+        {
+          "userId": 42988,
+          "_id": "5233164e743138816f00008d"
+        },
+        {
+          "userId": 45654,
+          "_id": "5237bce2c1c193cf6700000b"
+        },
+        {
+          "userId": 249,
+          "_id": "5238beca656d52a213000012"
+        }
+      ],
       "thumbnail": "http://stuff.webmaker.org/editorial-assets/amyburvall.jpg",
       "username": "amyburvall",
       "remixedFrom": "51bf9ce19d5050ae6c0005fb",
