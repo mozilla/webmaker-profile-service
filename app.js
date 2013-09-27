@@ -85,7 +85,7 @@ server.get('/user-data/:username', function fetchDataFromDB(req, res, next) {
       return next();
     }
 
-    res.json(results.data);
+    res.json(JSON.parse(results.data));
   }).error(next);
 }, function fakeData(req, res, next) {
   if (req.params.username === "reanimator") {
