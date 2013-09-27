@@ -11,14 +11,6 @@ var express = require('express'),
 Habitat.load();
 
 var config = new Habitat();
-
-// TODO - use actual data
-var userData = fs.readFileSync('db/reanimator.json', {
-  encoding: 'utf8'
-});
-
-userData = JSON.parse(userData);
-
 var server = express();
 
 server.disable( 'x-powered-by' );
@@ -78,48 +70,59 @@ require('express-persona')(server, {
   }
 });
 
-var isWriting = false;
-
 // ROUTES ---------------------------------------------------------------------
 
 // User Data
 
-server.get('/user-data/:username', function (req, res, next) {
-  res.json(userData);
+var fakeUserData = require('./db/reanimator.json');
+var db = require('./services/database').createClient(config.get('DATABASE'));
+var data = require('./services/data').createClient(config.get('MAKEAPI'));
+
+server.get('/user-data/:username', function fetchDataFromDB(req, res, next) {
+  db.find({ where: { userid: req.params.username }}).success(function(results) {
+    // No data exists in the DB, lets try generating some data
+    if (!results) {
+      return next();
+    }
+
+    res.json(results.data);
+  }).error(next);
+}, function fakeData(req, res, next) {
+  if (req.params.username === "reanimator") {
+    return res.json(fakeUserData);
+  }
+
+  next();
+}, function generateData(req, res, next) {
+  data.generate(req.params.username, function(err, data) {
+    if (err) {
+      return next(err);
+    }
+
+    if (!data) {
+      return res.send(404);
+    }
+
+    res.json(data);
+  });
 });
 
 server.post('/user-data/:username', function (req, res, next) {
-  var waitForWrite;
+  db.findOrCreate({ userid: req.params.username }, { data: JSON.stringify(req.body) }).success(function(result, created) {
+    if (created) {
+      return res.send(201);
+    }
 
-  // Overwrite existing keys with new data
-  Object.keys( req.body ).forEach(function(key) {
-    userData[key] = req.body[key];
-  });
+    var json = JSON.parse(result.data);
+    Object.keys( req.body ).forEach(function(key) {
+      json[key] = req.body[key];
+    });
 
-  function writeToJSON() {
-    isWriting = true;
-    fs.writeFile(
-      './db/' + req.params.username + '.json',
-      JSON.stringify(userData, null, 2), // 2 space indent
-
-      function () {
-        isWriting = false;
-      });
-  }
-
-  // TODO - This is super hacky, but so is using a text file as a database
-  if (!isWriting) {
-    writeToJSON();
-  } else {
-    waitForWrite = setInterval(function () {
-      if (!isWriting) {
-        writeToJSON();
-        clearInterval(waitForWrite);
-      }
-    }, 100);
-  }
-
-  res.send(201);
+    result.data = JSON.stringify(json);
+    result.save(['data']).success(function() {
+      res.send(204);
+    }).error(next);
+  }).error(next);
 });
 
 // Store Image
