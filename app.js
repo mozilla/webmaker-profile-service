@@ -84,18 +84,8 @@ var isWriting = false;
 
 // User Data
 
-// TODO - get specific key values if specified by param
-
 server.get('/user-data/:username', function (req, res, next) {
   res.json(userData);
-});
-
-server.get('/user-data/:username/:key', function (req, res, next) {
-  if (userData[req.params.key]) {
-    res.json(userData[req.params.key]);
-  } else {
-    res.send(404);
-  }
 });
 
 server.post('/user-data/:username', function (req, res, next) {
