@@ -129,15 +129,14 @@ server.post('/user-data/:username', function (req, res, next) {
 // TODO : Store imgs on S3
 
 server.post('/store-img', function (req, res, next) {
-  var imgPath = 'public/gifs/' + Date.now() + '.gif';
-
+  var imgName = Date.now() + '.gif';
+  var imgStoragePath = 'public/gifs/' + imgName;
   var base64Data = req.body.image.replace(/^data:image\/gif;base64,/, '');
 
-  require('fs').writeFile(imgPath, base64Data, 'base64');
+  require('fs').writeFile(imgStoragePath, base64Data, 'base64');
 
   res.json(201, {
-    //imageURL: 'http://wmp-service.herokuapp.com' + '/' + imgPath // HEROKU
-    imageURL: imgPath.replace('public/', 'http://localhost:8080/') // LOCALHOST
+    imageURL: config.get('IMGHOST') + imgName
   });
 });
 
