@@ -1,4 +1,5 @@
 var MakeAPI = require("makeapi-client");
+var defaultAvatar = "https://stuff.webmaker.org/avatars/webmaker-avatar-200x200.png";
 
 module.exports.createClient = function createClient(url) {
   var makeapi = new MakeAPI({
@@ -18,7 +19,7 @@ module.exports.createClient = function createClient(url) {
         callback(null, {
           "username": user,
           "realName": user,
-          "avatarSrc": "https://secure.gravatar.com/avatar/" + makes[0].emailHash + "?s=200&d=https%3A%2F%2Fstuff.webmaker.org%2Favatars%2Fwebmaker-avatar-200x200.png",
+          "avatarSrc": makes.length ? "https://secure.gravatar.com/avatar/" + makes[0].emailHash + "?s=200&d=" + encodeURIComponent(defaultAvatar) : defaultAvatar,
           "makes": makes.map(function(make) {
             return {
               "url": make.url,
