@@ -2,18 +2,14 @@ var MakeAPI = require("makeapi-client");
 
 module.exports.createClient = function createClient(url) {
   var makeapi = new MakeAPI({
-    apiURL: url,
-    hawk: {
-      id: "dummy",
-      key: "dummy",
-      algorithm: "sha256"
-    }
+    apiURL: url
   });
 
   return {
     generate: function(user, callback) {
       makeapi
       .user(user)
+      .limit(1000)
       .then(function(err, makes, total) {
         if (err) {
           return callback(err);
