@@ -125,18 +125,26 @@ server.post('/user-data/:username', function (req, res, next) {
   }).error(next);
 });
 
-// Store Image
-// TODO : Store imgs on S3
+var s3 = require('knox').createClient(config.get('S3'));
 
 server.post('/store-img', function (req, res, next) {
-  var imgName = Date.now() + '.gif';
-  var imgStoragePath = 'public/gifs/' + imgName;
-  var base64Data = req.body.image.replace(/^data:image\/gif;base64,/, '');
+  var base64Data = new Buffer(req.body.image, 'base64');
 
-  require('fs').writeFile(imgStoragePath, base64Data, 'base64');
+  var s3req = s3.putBuffer(base64Data, '/gifs/' + uid(24) + '.gif', {
+    'Content-Type': 'image/gif',
+    'x-amz-acl': 'public-read'
+  }, function(err, s3res) {
+    if (err) {
+      return next(err);
+    }
 
-  res.json(201, {
-    imageURL: config.get('IMGHOST') + imgName
+    if (s3res.statusCode !== 200) {
+      return next('S3 returned HTTP ' + s3res.statusCode);
+    }
+
+    res.json(201, {
+      imageURL: s3req.url
+    });
   });
 });
 
