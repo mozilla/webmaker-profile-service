@@ -42,32 +42,9 @@ server.use(function cors( req, res, next ) {
   next();
 });
 
-require('express-persona')(server, {
-  audience: config.get('AUDIENCE'),
-  verifyResponse: function(err, req, res, email) {
-    if ( err ) {
-      return res.json({
-        status: "failure",
-        reason: err
-      });
-    }
-    req.session.email = email;
-    req.session._csrf = uid(24);
-    res.json({
-      status: "okay",
-      data: {
-        email: email,
-        csrf: req.session._csrf
-      }
-    });
-  },
-  logoutResponse: function(err, req, res) {
-    delete req.session.email;
-    delete req.session._csrf;
-    res.json({
-      status: "okay"
-    });
-  }
+require('webmaker-loginapi')(server, {
+  loginURL: config.get('LOGINAPI'),
+  audience: config.get('AUDIENCE')
 });
 
 // ROUTES ---------------------------------------------------------------------
