@@ -11,6 +11,7 @@ module.exports.createClient = function createClient(url) {
       makeapi
       .user(user)
       .limit(1000)
+      .sortByField('updatedAt', 'desc')
       .then(function(err, makes, total) {
         if (err) {
           return callback(err);
