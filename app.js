@@ -3,6 +3,7 @@
 var express = require('express'),
     fs = require('fs'),
     Habitat = require('habitat'),
+    helmet = require('helmet'),
     path = require('path'),
     uid = require('uid2');
 
@@ -14,6 +15,11 @@ var config = new Habitat();
 var server = express();
 
 server.disable( 'x-powered-by' );
+if (config.get('FORCE_SSL') ) {
+  app.use(helmet.hsts());
+  app.enable('trust proxy');
+}
+
 server.use(express.compress());
 server.use(express.logger());
 server.use(express.static( path.join(__dirname + '/node_modules/webmaker-profile')));
@@ -25,21 +31,14 @@ server.use(express.multipart());
 server.use(express.cookieParser());
 server.use(express.cookieSession({
   key: 'webmaker-profile.sid',
-  secret: 'a',
+  secret: config.get('SESSION_SECRET'),
   cookie: {
     // 31 days
     maxAge: 31 * 24 * 60 * 60 * 1000,
-    secure: false
+    secure: config.get('FORCE_SSL')
   },
-  proxy: true
+  proxy: config.get('FORCE_SSL')
 }));
-
-server.use(function cors( req, res, next ) {
-  res.header('Access-Control-Allow-Origin', config.get('AUDIENCE'));
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, x-csrf-token');
-  next();
-});
 
 require('webmaker-loginapi')(server, {
   loginURL: config.get('LOGINAPI'),
@@ -127,6 +126,6 @@ server.post('/store-img', function (req, res, next) {
 // START ----------------------------------------------------------------------
 require("webmaker-profile").build(function() {
   server.listen(config.get('PORT'), function () {
-    console.log('server listening on http://localhost:%s', config.get('PORT'));
+    console.log('server listening on %s', config.get('AUDIENCE'));
   });
 });
