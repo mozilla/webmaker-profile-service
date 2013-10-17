@@ -84,6 +84,10 @@ server.get('/user-data/:username', function fetchDataFromDB(req, res, next) {
 });
 
 server.post('/user-data/:username', function (req, res, next) {
+  if (req.session.username !== req.params.username && req.params.username !== 'reanimator') {
+    return res.send(403);
+  }
+
   db.findOrCreate({ userid: req.params.username }, { data: JSON.stringify(req.body) }).success(function(result, created) {
     if (created) {
       return res.send(201);
