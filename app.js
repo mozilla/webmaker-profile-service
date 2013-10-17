@@ -60,7 +60,8 @@ server.get('/user-data/:username', function fetchDataFromDB(req, res, next) {
       return next();
     }
 
-    res.json(JSON.parse(results.data));
+    res.type('application/json; charset=utf-8');
+    res.send(200, results.data);
   }).error(next);
 }, function fakeData(req, res, next) {
   if (req.params.username === "reanimator") {
@@ -88,7 +89,12 @@ server.post('/user-data/:username', function (req, res, next) {
       return res.send(201);
     }
 
-    var json = JSON.parse(result.data);
+    try {
+      var json = JSON.parse(result.data);
+    } catch (ex) {
+      return res.send(500);
+    }
+
     Object.keys( req.body ).forEach(function(key) {
       json[key] = req.body[key];
     });
