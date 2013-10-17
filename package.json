@@ -11,7 +11,8 @@
     "mysql": "2.0.0-alpha9",
     "sequelize": "~2.0.0-beta.0",
     "uid2": "0.0.3",
-    "webmaker-loginapi": "https://github.com/mozilla/node-webmaker-loginapi/archive/v0.1.15.tar.gz"
+    "webmaker-loginapi": "https://github.com/mozilla/node-webmaker-loginapi/archive/v0.1.15.tar.gz",
+    "webmaker-profile": "https://github.com/mozilla/webmaker-profile/archive/v0.1.9.tar.gz"
   },
   "devDependencies": {
     "api-easy": "0.3.8",

@@ -16,6 +16,7 @@ var server = express();
 server.disable( 'x-powered-by' );
 server.use(express.compress());
 server.use(express.logger());
+server.use(express.static( path.join(__dirname + '/node_modules/webmaker-profile')));
 server.use(express.json());
 server.use(express.urlencoded());
 // unsafe, remove later
@@ -32,8 +33,6 @@ server.use(express.cookieSession({
   },
   proxy: true
 }));
-
-server.use(express.static( path.join(__dirname + '/public')));
 
 server.use(function cors( req, res, next ) {
   res.header('Access-Control-Allow-Origin', config.get('AUDIENCE'));
@@ -126,6 +125,8 @@ server.post('/store-img', function (req, res, next) {
 });
 
 // START ----------------------------------------------------------------------
-server.listen(config.get('PORT'), function () {
-  console.log('server listening on port %s', config.get('PORT'));
+require("webmaker-profile").build(function() {
+  server.listen(config.get('PORT'), function () {
+    console.log('server listening on http://localhost:%s', config.get('PORT'));
+  });
 });
