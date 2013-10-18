@@ -16,8 +16,8 @@ var server = express();
 
 server.disable( 'x-powered-by' );
 if (config.get('FORCE_SSL') ) {
-  app.use(helmet.hsts());
-  app.enable('trust proxy');
+  server.use(helmet.hsts());
+  server.enable('trust proxy');
 }
 
 server.use(express.compress());
