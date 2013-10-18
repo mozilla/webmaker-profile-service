@@ -54,14 +54,29 @@ var db = require('./services/database').createClient(config.get('DATABASE'));
 var data = require('./services/data').createClient(config.get('MAKEAPI'));
 
 server.get('/user-data/:username', function fetchDataFromDB(req, res, next) {
-  db.find({ where: { userid: req.params.username }}).success(function(results) {
+  var username = req.params.username;
+  db.find({ where: { userid: username }}).success(function(results) {
     // No data exists in the DB, lets try generating some data
     if (!results) {
       return next();
     }
 
     res.type('application/json; charset=utf-8');
-    res.send(200, results.data);
+    if ( req.session && req.session.username === username ) {
+      try {
+        data.hydrate(JSON.parse(results.data), function(err, data) {
+          if (err) {
+            return next(err);
+          }
+          res.send(200, JSON.stringify(data));
+        });
+      } catch(e) {
+        console.error('error: ' + JSON.stringify(e));
+        res.send(500);
+      }
+    } else {
+      res.send(200, results.data);
+    }
   }).error(next);
 }, function fakeData(req, res, next) {
   if (req.params.username === "reanimator") {

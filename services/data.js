@@ -6,6 +6,25 @@ module.exports.createClient = function createClient(url) {
     apiURL: url
   });
 
+  var profileMakeAttrs = [
+    "url",
+    "contentType",
+    "locale",
+    "title",
+    "description",
+    "author",
+    "published",
+    "tags",
+    "thumbnail",
+    "username",
+    "remixedFrom",
+    "emailHash",
+    "createdAt",
+    "updatedAt",
+    "likes",
+    "id"
+  ];
+
   return {
     generate: function(user, callback) {
       makeapi
@@ -46,6 +65,42 @@ module.exports.createClient = function createClient(url) {
             return make.id;
           })
         });
+      });
+    },
+    hydrate: function(data, callback) {
+      var makeIdHash = {};
+      makeapi
+      .user(data.username)
+      .limit(1000)
+      .sortByField('updatedAt', 'desc')
+      .then(function(err, makes, total) {
+        if (err) {
+          return callback(err);
+        }
+        data.makes.forEach(function(make) {
+          makeIdHash[make.id] = make;
+        });
+
+        makes.forEach(function(make) {
+          var id = make.id;
+          if (makeIdHash[id]) {
+            profileMakeAttrs.forEach(function(key) {
+              if (make[key] !== makeIdHash[id][key]) {
+                makeIdHash[id][key] = make[key];
+              }
+            });
+          } else {
+            makeIdHash[id] = make;
+            makeIdHash[id].type = make.contentType.substring(14)
+            data.tileOrder.push(id);
+          }
+        });
+
+        data.makes = Object.keys(makeIdHash).map(function(id) {
+          return makeIdHash[id];
+        });
+
+        callback(null, data);
       });
     }
   }
