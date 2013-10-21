@@ -148,6 +148,16 @@ server.post('/store-img', function (req, res, next) {
   });
 });
 
+var _feConfig = JSON.stringify({
+  serviceURL: config.get('AUDIENCE'),
+  confirmDelete: true
+});
+
+server.get('/env.json', function(req, res, next) {
+  res.type('application/json; charset=utf-8');
+  res.send(200, _feConfig);
+})
+
 // START ----------------------------------------------------------------------
 require("webmaker-profile").build(function() {
   server.listen(config.get('PORT'), function () {
