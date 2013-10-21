@@ -68,7 +68,15 @@ module.exports.createClient = function createClient(url) {
       });
     },
     hydrate: function(data, callback) {
-      var makeIdHash = {};
+      var profileIdHash = {},
+          newMakeIdHash = {};
+
+      // store make data from the current profile as an object, keyed by ID
+      data.makes.forEach(function(make) {
+        profileIdHash[make.id] = make;
+      });
+
+      // get up to 1000 of the user's most recent makes
       makeapi
       .user(data.username)
       .limit(1000)
@@ -77,27 +85,38 @@ module.exports.createClient = function createClient(url) {
         if (err) {
           return callback(err);
         }
-        data.makes.forEach(function(make) {
-          makeIdHash[make.id] = make;
+
+        // store the make data from the request as an object, keyed by ID
+        makes.forEach(function(make) {
+          newMakeIdHash[make.id] = make;
         });
 
+        // if an id in the profile does not exist in the search hits, remove it from the profile
+        Object.keys(profileIdHash).forEach(function(id) {
+          if ( profileIdHash.type !== 'hackable' && !newMakeIdHash[id] ) {
+            delete profileIdHash[id];
+          }
+        });
+
+        // update profile make data using search results, and add new makes to the profile automatically
         makes.forEach(function(make) {
           var id = make.id;
-          if (makeIdHash[id]) {
+          if (profileIdHash[id]) {
             profileMakeAttrs.forEach(function(key) {
-              if (make[key] !== makeIdHash[id][key]) {
-                makeIdHash[id][key] = make[key];
+              if (make[key] !== profileIdHash[id][key]) {
+                profileIdHash[id][key] = make[key];
               }
             });
           } else {
-            makeIdHash[id] = make;
-            makeIdHash[id].type = make.contentType.substring(14)
+            profileIdHash[id] = make;
+            profileIdHash[id].type = make.contentType.substring(14)
             data.tileOrder.push(id);
           }
         });
 
-        data.makes = Object.keys(makeIdHash).map(function(id) {
-          return makeIdHash[id];
+        // generate the new profile data
+        data.makes = Object.keys(profileIdHash).map(function(id) {
+          return profileIdHash[id];
         });
 
         callback(null, data);
