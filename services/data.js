@@ -93,7 +93,7 @@ module.exports.createClient = function createClient(url) {
 
         // if an id in the profile does not exist in the search hits, remove it from the profile
         Object.keys(profileIdHash).forEach(function(id) {
-          if ( profileIdHash.type !== 'hackable' && !newMakeIdHash[id] ) {
+          if ( profileIdHash[id].type !== 'hackable' && !newMakeIdHash[id] ) {
             delete profileIdHash[id];
           }
         });
