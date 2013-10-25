@@ -40,6 +40,8 @@ server.use(express.cookieSession({
   proxy: config.get('FORCE_SSL')
 }));
 
+server.use(express.csrf());
+
 require('webmaker-loginapi')(server, {
   loginURL: config.get('LOGINAPI'),
   audience: config.get('AUDIENCE')
@@ -120,7 +122,7 @@ server.post('/user-data/:username', function (req, res, next) {
 
     result.data = JSON.stringify(json);
     result.save(['data']).success(function() {
-      res.send(204);
+      res.send(200);
     }).error(next);
   }).error(next);
 });
@@ -156,7 +158,11 @@ var _feConfig = JSON.stringify({
 server.get('/env.json', function(req, res, next) {
   res.type('application/json; charset=utf-8');
   res.send(200, _feConfig);
-})
+});
+
+server.get('/getcsrf', function(req, res, next) {
+  res.json({csrfToken: req.session._csrf});
+});
 
 // START ----------------------------------------------------------------------
 require("webmaker-profile").build(function() {
