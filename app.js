@@ -14,14 +14,26 @@ Habitat.load();
 var config = new Habitat();
 var server = express();
 
+var messina,
+    logger;
+
 server.disable( 'x-powered-by' );
 if (config.get('FORCE_SSL') ) {
   server.use(helmet.hsts());
   server.enable('trust proxy');
 }
 
+if (config.get('ENABLE_GELF_LOGS')) {
+  messina = require('messina');
+  logger = messina('profile-service-' + config.get('NODE_ENV') || 'development')
+  logger.init();
+  server.use(logger.middleware());
+} else {
+  server.use(express.logger());
+}
+
+
 server.use(express.compress());
-server.use(express.logger());
 server.use(express.static( path.join(__dirname + '/node_modules/webmaker-profile')));
 server.use(express.json());
 server.use(express.urlencoded());
