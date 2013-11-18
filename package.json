@@ -1,6 +1,6 @@
 {
   "name": "webmaker-profile-service",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Backend service for Webmaker Profile",
   "main": "app.js",
   "dependencies": {
