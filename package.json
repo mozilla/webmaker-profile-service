@@ -8,7 +8,7 @@
     "habitat": "0.4.2",
     "helmet": "0.1.0",
     "knox": "0.8.6",
-    "makeapi-client": "https://github.com/mozilla/makeapi-client/tarball/v0.5.10",
+    "makeapi-client": "https://github.com/mozilla/makeapi-client/tarball/v0.5.12",
     "messina": "0.1.1",
     "mysql": "2.0.0-alpha9",
     "sequelize": "~2.0.0-beta.0",
