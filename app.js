@@ -176,6 +176,16 @@ server.get('/getcsrf', function(req, res, next) {
   res.json({csrfToken: req.session._csrf});
 });
 
+var healthcheck = JSON.stringify({
+  http: "okay",
+  version: require("./package.json").version
+});
+
+server.get('/healthcheck', function(req, res) {
+  res.type('application/json; charset=utf-8');
+  res.send(healthcheck);
+});
+
 // START ----------------------------------------------------------------------
 require("webmaker-profile").build(function() {
   server.listen(config.get('PORT'), function () {
