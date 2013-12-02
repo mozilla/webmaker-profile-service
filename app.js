@@ -4,6 +4,7 @@ var express = require('express'),
     fs = require('fs'),
     Habitat = require('habitat'),
     helmet = require('helmet'),
+    hood = require('hood'),
     path = require('path'),
     uid = require('uid2');
 
@@ -24,6 +25,16 @@ if (config.get('FORCE_SSL') ) {
 }
 server.use(helmet.iexss());
 server.use(helmet.contentTypeOptions());
+
+server.use(hood.csp({
+  policy: {
+    'default-src': ["'self'"],
+    'frame-src': ["https://login.persona.org"],
+    'img-src': ["*"],
+    'media-src': ["'self'", "mediastream:"],
+    'script-src': ["'self'", "https://login.persona.org"]
+  }
+}));
 
 if (config.get('ENABLE_GELF_LOGS')) {
   messina = require('messina');
