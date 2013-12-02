@@ -24,7 +24,6 @@ if (config.get('FORCE_SSL') ) {
 }
 server.use(helmet.iexss());
 server.use(helmet.contentTypeOptions());
-server.use(helmet.xframe());
 
 if (config.get('ENABLE_GELF_LOGS')) {
   messina = require('messina');
