@@ -22,6 +22,9 @@ if (config.get('FORCE_SSL') ) {
   server.use(helmet.hsts());
   server.enable('trust proxy');
 }
+server.use(helmet.iexss());
+server.use(helmet.contentTypeOptions());
+server.use(helmet.xframe());
 
 if (config.get('ENABLE_GELF_LOGS')) {
   messina = require('messina');
@@ -31,7 +34,6 @@ if (config.get('ENABLE_GELF_LOGS')) {
 } else {
   server.use(express.logger());
 }
-
 
 server.use(express.compress());
 server.use(express.static( path.join(__dirname + '/node_modules/webmaker-profile')));
