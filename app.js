@@ -27,6 +27,9 @@ server.use(helmet.iexss());
 server.use(helmet.contentTypeOptions());
 
 server.use(hood.csp({
+  headers: [
+    "Content-Security-Policy"
+  ],
   policy: {
     'default-src': ["'self'"],
     'frame-src': ["https://login.persona.org"],
