@@ -26,7 +26,7 @@ if (config.get('FORCE_SSL') ) {
 server.use(helmet.iexss());
 server.use(helmet.contentTypeOptions());
 
-server.use(hood.csp({
+var policy = {
   headers: [
     "Content-Security-Policy"
   ],
@@ -37,7 +37,13 @@ server.use(hood.csp({
     'media-src': ["'self'", "mediastream:"],
     'script-src': ["'self'", "https://login.persona.org"]
   }
-}));
+};
+
+if (config.get('CSP_LOGGER')) {
+  policy.policy['report-uri'] = config.get('CSP_LOGGER');
+}
+
+server.use(hood.csp(policy));
 
 if (config.get('ENABLE_GELF_LOGS')) {
   messina = require('messina');
