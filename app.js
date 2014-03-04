@@ -6,7 +6,9 @@ var express = require('express'),
     helmet = require('helmet'),
     hood = require('hood'),
     path = require('path'),
-    uid = require('uid2');
+    uid = require('uid2'),
+    WebmakerAuth = require('webmaker-auth');
+
 
 // SETUP ----------------------------------------------------------------------
 
@@ -14,6 +16,13 @@ Habitat.load();
 
 var config = new Habitat();
 var server = express();
+
+var webmakerAuth = new WebmakerAuth({
+  loginURL: config.get('LOGINAPI'),
+  secretKey: config.get('SESSION_SECRET'),
+  domain: config.get('COOKIE_DOMAIN'),
+  forceSSL: config.get('FORCE_SSL'),
+});
 
 var messina,
     logger;
@@ -51,7 +60,7 @@ if (config.get('ENABLE_GELF_LOGS')) {
   logger.init();
   server.use(logger.middleware());
 } else {
-  server.use(express.logger());
+  server.use(express.logger('dev'));
 }
 
 server.use(express.compress());
@@ -61,24 +70,10 @@ server.use(express.urlencoded());
 // unsafe, remove later
 server.use(express.multipart());
 
-server.use(express.cookieParser());
-server.use(express.cookieSession({
-  key: 'webmaker-profile.sid',
-  secret: config.get('SESSION_SECRET'),
-  cookie: {
-    // 31 days
-    maxAge: 31 * 24 * 60 * 60 * 1000,
-    secure: config.get('FORCE_SSL')
-  },
-  proxy: config.get('FORCE_SSL')
-}));
+server.use(webmakerAuth.cookieParser());
+server.use(webmakerAuth.cookieSession());
 
 server.use(express.csrf());
-
-require('webmaker-loginapi')(server, {
-  loginURL: config.get('LOGINAPI'),
-  audience: config.get('AUDIENCE')
-});
 
 // ROUTES ---------------------------------------------------------------------
 
@@ -88,8 +83,16 @@ var fakeUserData = require('./db/reanimator.json');
 var db = require('./services/database').createClient(config.get('DATABASE'));
 var data = require('./services/data').createClient(config.get('MAKEAPI'));
 
+// Authentication routes
+server.post('/verify', webmakerAuth.handlers.verify);
+server.post('/authenticate', webmakerAuth.handlers.authenticate);
+server.post('/create', webmakerAuth.handlers.create);
+server.post('/logout', webmakerAuth.handlers.logout);
+server.post('/check-username', webmakerAuth.handlers.exists);
+
 server.get('/user-data/:username', function fetchDataFromDB(req, res, next) {
   var username = req.params.username;
+
   db.find({ where: { userid: username }}).success(function(results) {
     // No data exists in the DB, lets try generating some data
     if (!results) {
@@ -97,7 +100,7 @@ server.get('/user-data/:username', function fetchDataFromDB(req, res, next) {
     }
 
     res.type('application/json; charset=utf-8');
-    if ( req.session && req.session.username === username ) {
+    if ( req.session.user && req.session.user.username === username ) {
       try {
         data.hydrate(JSON.parse(results.data), function(err, data) {
           if (err) {
@@ -134,7 +137,7 @@ server.get('/user-data/:username', function fetchDataFromDB(req, res, next) {
 });
 
 server.post('/user-data/:username', function (req, res, next) {
-  if (req.session.username !== req.params.username && req.params.username !== 'reanimator') {
+  if (req.session.user && req.session.user.username !== req.params.username && req.params.username !== 'reanimator') {
     return res.send(403);
   }
 
