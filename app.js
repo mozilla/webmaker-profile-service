@@ -1,3 +1,7 @@
+if (process.env.NEW_RELIC_ENABLED) {
+  require('newrelic');
+}
+
 // INCLUDES -------------------------------------------------------------------
 
 var express = require('express'),
